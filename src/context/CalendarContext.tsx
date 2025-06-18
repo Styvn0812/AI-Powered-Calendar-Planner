@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext, ReactNode } from 'react';
-import { addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 export interface Event {
   id: string;
   title: string;
