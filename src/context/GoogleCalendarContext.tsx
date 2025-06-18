@@ -19,16 +19,9 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Simplified initialization - no async calls that could fail
   useEffect(() => {
-    const initializeGoogleCalendar = async () => {
-      try {
-        await googleCalendarService.initialize();
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to initialize Google Calendar'));
-      }
-    };
-
-    initializeGoogleCalendar();
+    console.log('GoogleCalendarProvider initialized');
   }, []);
 
   const refreshEvents = async (date: Date) => {
@@ -40,6 +33,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
       const fetchedEvents = await googleCalendarService.listEvents(timeMin, timeMax);
       setEvents(fetchedEvents);
     } catch (err) {
+      console.error('Error refreshing events:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch events'));
     } finally {
       setIsLoading(false);
@@ -54,6 +48,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
       // Refresh events after creating a new one
       await refreshEvents(new Date(event.start.dateTime || event.start.date || ''));
     } catch (err) {
+      console.error('Error creating event:', err);
       setError(err instanceof Error ? err : new Error('Failed to create event'));
     } finally {
       setIsLoading(false);
@@ -71,6 +66,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
         await refreshEvents(new Date(updatedEvent.start.dateTime || updatedEvent.start.date || ''));
       }
     } catch (err) {
+      console.error('Error updating event:', err);
       setError(err instanceof Error ? err : new Error('Failed to update event'));
     } finally {
       setIsLoading(false);
@@ -85,6 +81,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
       // Remove the deleted event from the state
       setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
     } catch (err) {
+      console.error('Error deleting event:', err);
       setError(err instanceof Error ? err : new Error('Failed to delete event'));
     } finally {
       setIsLoading(false);
