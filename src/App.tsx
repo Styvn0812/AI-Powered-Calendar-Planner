@@ -1,15 +1,15 @@
-import React from 'react';
-import { Calendar } from './components/Calendar/Calendar';
 import { CalendarProvider } from './context/CalendarContext';
 import { GoogleCalendarProvider } from './context/GoogleCalendarContext';
+import { ChatProvider } from './context/ChatContext';
+import { Layout } from './components/Layout';
 
 function App() {
   return (
     <GoogleCalendarProvider>
       <CalendarProvider>
-        <div className="h-screen bg-gray-50">
-          <Calendar />
-        </div>
+        <ChatProvider>
+          <Layout />
+        </ChatProvider>
       </CalendarProvider>
     </GoogleCalendarProvider>
   );
