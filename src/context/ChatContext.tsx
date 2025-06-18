@@ -1,5 +1,5 @@
-import React, { useState, createContext, useContext } from 'react';
-import { processMessage } from '../utils/mockAI';
+import React, { useState, createContext, useContext, ReactNode } from 'react';
+import { askGemini } from '../services/gemini';
 export interface ChatMessage {
   id: string;
   text: string;
@@ -8,7 +8,7 @@ export interface ChatMessage {
 }
 interface ChatContextType {
   messages: ChatMessage[];
-  sendMessage: (message: string) => void;
+  sendMessage: (message: string) => Promise<void>;
   isLoading: boolean;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -33,10 +33,9 @@ export const ChatProvider: React.FC<{
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
-    // Simulate AI response
     setIsLoading(true);
-    setTimeout(() => {
-      const response = processMessage(text);
+    try {
+      const response = await askGemini(text);
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: response,
@@ -44,8 +43,17 @@ export const ChatProvider: React.FC<{
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      const aiMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: 'Sorry, there was an error getting a response from Gemini.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
   return <ChatContext.Provider value={{
     messages,

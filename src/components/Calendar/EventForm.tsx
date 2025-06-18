@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { XIcon } from 'lucide-react';
 import { useCalendar } from '../../context/CalendarContext';
 import { format } from 'date-fns';
+
 interface EventFormProps {
   eventId?: string;
   onClose: () => void;
 }
+
 export const EventForm = ({
   eventId,
   onClose
