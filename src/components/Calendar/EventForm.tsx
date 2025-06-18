@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { XIcon } from 'lucide-react';
-import { useCalendar, Event } from '../../context/CalendarContext';
+import { useCalendar } from '../../context/CalendarContext';
 import { format } from 'date-fns';
 interface EventFormProps {
   eventId?: string;
