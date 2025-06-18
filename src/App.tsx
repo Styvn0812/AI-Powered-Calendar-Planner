@@ -1,14 +1,17 @@
 import { CalendarProvider } from './context/CalendarContext';
 import { ChatProvider } from './context/ChatContext';
+import { GoogleCalendarProvider } from './context/GoogleCalendarContext';
 import { Layout } from './components/Layout';
 
 function App() {
   return (
-    <CalendarProvider>
-      <ChatProvider>
-        <Layout />
-      </ChatProvider>
-    </CalendarProvider>
+    <GoogleCalendarProvider>
+      <CalendarProvider>
+        <ChatProvider>
+          <Layout />
+        </ChatProvider>
+      </CalendarProvider>
+    </GoogleCalendarProvider>
   );
 }
 
