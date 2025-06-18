@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { googleCalendarService, GoogleCalendarEvent } from '../services/googleCalendar';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
@@ -24,7 +24,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
     console.log('GoogleCalendarProvider initialized');
   }, []);
 
-  const refreshEvents = async (date: Date) => {
+  const refreshEvents = useCallback(async (date: Date) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -38,9 +38,9 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const createEvent = async (event: Omit<GoogleCalendarEvent, 'id'>) => {
+  const createEvent = useCallback(async (event: Omit<GoogleCalendarEvent, 'id'>) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -53,9 +53,9 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [refreshEvents]);
 
-  const updateEvent = async (eventId: string, event: Partial<GoogleCalendarEvent>) => {
+  const updateEvent = useCallback(async (eventId: string, event: Partial<GoogleCalendarEvent>) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -71,9 +71,9 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [events, refreshEvents]);
 
-  const deleteEvent = async (eventId: string) => {
+  const deleteEvent = useCallback(async (eventId: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -86,7 +86,7 @@ export const GoogleCalendarProvider: React.FC<{ children: React.ReactNode }> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return (
     <GoogleCalendarContext.Provider
