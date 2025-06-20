@@ -11,8 +11,15 @@ export async function askGemini(prompt: string): Promise<string> {
       throw new Error('Gemini API key is not configured. Please check your .env file.');
     }
     
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-    const result = await model.generateContent(prompt);
+    // Scheduling-focused system prompt
+    const systemPrompt = `
+      You are an AI assistant that ONLY helps with scheduling, calendar management, and event planning.
+      If a user asks something unrelated to scheduling, politely redirect them to ask about scheduling or calendar tasks.
+      Be concise and helpful.
+    `;
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await model.generateContent(systemPrompt + "\nUser: " + prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
