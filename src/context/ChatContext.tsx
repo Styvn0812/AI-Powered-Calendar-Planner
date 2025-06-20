@@ -1,8 +1,5 @@
 import React, { useState, createContext, useContext, ReactNode } from 'react';
 import { askGemini } from '../services/gemini';
-// @ts-ignore
-import chrono from 'chrono-node';
-import { useCalendar } from './CalendarContext';
 
 export interface ChatMessage {
   id: string;
@@ -28,7 +25,6 @@ export const ChatProvider: React.FC<{
     timestamp: new Date()
   }]);
   const [isLoading, setIsLoading] = useState(false);
-  const { addEvent } = useCalendar();
 
   const sendMessage = async (text: string) => {
     // Add user message
@@ -42,33 +38,6 @@ export const ChatProvider: React.FC<{
     setIsLoading(true);
     try {
       const response = await askGemini(text);
-
-      // --- Robust parsing with chrono-node ---
-      // Example: "Okay, I have scheduled Lunch with Sarah next Friday at noon."
-      const scheduleMatch = response.match(/scheduled (.+?)(?: on| for| at|$)/i);
-      if (scheduleMatch) {
-        const title = scheduleMatch[1].trim();
-        // Use chrono-node to parse date/time from the response
-        const parsed = chrono.parse(response);
-        if (parsed.length > 0) {
-          const date = parsed[0].start.date();
-          let time = '';
-          if (parsed[0].start.isCertain('hour')) {
-            const hour = parsed[0].start.get('hour');
-            const minute = parsed[0].start.get('minute') || 0;
-            time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          }
-          addEvent({
-            title,
-            date,
-            time,
-            description: '', // You can extract more if you want
-            color: 'bg-blue-500'
-          });
-        }
-      }
-      // --- End robust parsing ---
-
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: response,
