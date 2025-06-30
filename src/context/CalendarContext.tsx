@@ -191,14 +191,17 @@ export const CalendarProvider: React.FC<{
 
   const getEventsForDate = (date: Date) => {
     // Compare only the date part (ignoring time and timezone)
+    console.log('getEventsForDate called for:', date.toISOString());
+    console.log('Current events array:', events.map(e => ({ id: e.id, date: e.date, dateISO: e.date instanceof Date ? e.date.toISOString() : e.date })));
     const result = events.filter(event => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
       const compareDate = new Date(date);
       compareDate.setHours(0, 0, 0, 0);
+      console.log('Comparing eventDate:', eventDate.toISOString(), 'with compareDate:', compareDate.toISOString());
       return eventDate.getTime() === compareDate.getTime();
     });
-    console.log('getEventsForDate', date, result);
+    console.log('getEventsForDate result for', date.toISOString(), result);
     return result;
   };
 
