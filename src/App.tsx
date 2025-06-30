@@ -1,28 +1,50 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { SignIn, SignUp, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import { CalendarProvider } from './context/CalendarContext';
 import { ChatProvider } from './context/ChatContext';
 import { GoogleCalendarProvider } from './context/GoogleCalendarContext';
 import { Layout } from './components/Layout';
-import SignIn from './components/Auth/SignIn';
-import SignUp from './components/Auth/SignUp';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        {/* Main app route (wrap with providers) */}
+        {/* Clerk's prebuilt authentication pages */}
+        <Route 
+          path="/sign-in" 
+          element={<SignIn routing="path" path="/sign-in" />} 
+        />
+        <Route 
+          path="/sign-up" 
+          element={<SignUp routing="path" path="/sign-up" />} 
+        />
+        
+        {/* Main app route - only accessible when signed in */}
         <Route path="/app/*" element={
-          <GoogleCalendarProvider>
-            <CalendarProvider>
-              <ChatProvider>
-                <Layout />
-              </ChatProvider>
-            </CalendarProvider>
-          </GoogleCalendarProvider>
+          <SignedIn>
+            <GoogleCalendarProvider>
+              <CalendarProvider>
+                <ChatProvider>
+                  <Layout />
+                </ChatProvider>
+              </CalendarProvider>
+            </GoogleCalendarProvider>
+          </SignedIn>
         } />
-        {/* Default route: redirect to sign-in */}
+        
+        {/* Root route - redirect to sign-in if not authenticated, or to app if authenticated */}
+        <Route path="/" element={
+          <>
+            <SignedIn>
+              <Navigate to="/app" replace />
+            </SignedIn>
+            <SignedOut>
+              <Navigate to="/sign-in" replace />
+            </SignedOut>
+          </>
+        } />
+        
+        {/* Catch all other routes */}
         <Route path="*" element={<Navigate to="/sign-in" replace />} />
       </Routes>
     </Router>

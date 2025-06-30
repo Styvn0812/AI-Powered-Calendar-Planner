@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserButton } from '@clerk/clerk-react';
 import { Calendar } from './Calendar/Calendar';
 import { ChatInterface } from './Chatbot/ChatInterface';
 
@@ -6,8 +7,9 @@ export const Layout = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 py-4 px-6">
+      <header className="bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">AI Calendar Planner</h1>
+        <UserButton />
       </header>
 
       {/* Main Content */}
