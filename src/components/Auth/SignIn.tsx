@@ -1,10 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-interface SignInProps {
-  onSwitchToSignUp: () => void;
-}
-
-const SignIn: React.FC<SignInProps> = ({ onSwitchToSignUp }) => {
+const SignIn: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
@@ -15,7 +12,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitchToSignUp }) => {
             <input
               type="email"
               placeholder="Email address"
-              className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
           </div>
@@ -23,7 +20,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitchToSignUp }) => {
             <input
               type="password"
               placeholder="Password"
-              className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
           </div>
@@ -35,14 +32,14 @@ const SignIn: React.FC<SignInProps> = ({ onSwitchToSignUp }) => {
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-md transition-colors"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition-colors"
           >
             Sign in
           </button>
         </form>
         <p className="text-center text-gray-600 mt-6">
           Don't have an account?{' '}
-          <button type="button" onClick={onSwitchToSignUp} className="text-indigo-600 hover:underline focus:outline-none">Sign up</button>
+          <Link to="/sign-up" className="text-indigo-700 font-semibold hover:underline">Sign up</Link>
         </p>
       </div>
     </div>
