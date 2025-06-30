@@ -84,6 +84,7 @@ export const CalendarProvider: React.FC<{
       });
       
       setEvents(convertedEvents);
+      console.log('Loaded events:', convertedEvents);
     } catch (err) {
       console.error('Error loading events:', err);
       setError('Failed to load events');
@@ -138,6 +139,8 @@ export const CalendarProvider: React.FC<{
       setError(null);
       // Force reload events from Supabase to ensure calendar and sidebar are in sync
       await loadEvents();
+      console.log('Event added:', newEvent);
+      console.log('Events after add:', events);
     } catch (err) {
       console.error('Error adding event:', err);
       setError('Failed to add event');
@@ -188,13 +191,15 @@ export const CalendarProvider: React.FC<{
 
   const getEventsForDate = (date: Date) => {
     // Compare only the date part (ignoring time and timezone)
-    return events.filter(event => {
+    const result = events.filter(event => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
       const compareDate = new Date(date);
       compareDate.setHours(0, 0, 0, 0);
       return eventDate.getTime() === compareDate.getTime();
     });
+    console.log('getEventsForDate', date, result);
+    return result;
   };
 
   return (
