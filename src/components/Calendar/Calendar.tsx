@@ -112,16 +112,16 @@ export const Calendar: React.FC = () => {
             )}
           </div>
           {hasEvents && isSameMonth(day, currentMonth) && (
-            <div className="mt-1 overflow-hidden max-h-[40px]">
+            <div className="mt-1">
               {[...eventsForDay, ...googleEventsForDay].slice(0, 2).map((event: any) => (
                 <div
                   key={event.id}
                   className={`text-xs truncate px-1 py-0.5 rounded mb-1 ${
                     event.color || 'bg-blue-100 text-blue-800'
-                  } border-2 border-red-500 bg-yellow-200`}
+                  }`}
                 >
-                  {event.time && `${event.time} · `}
-                  {event.title || event.summary}
+                  {event.time && <span className="font-semibold">{event.time} · </span>}
+                  <span>{event.title || event.summary}</span>
                 </div>
               ))}
               {eventsForDay.length + googleEventsForDay.length > 2 && (
