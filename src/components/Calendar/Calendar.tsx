@@ -118,7 +118,7 @@ export const Calendar: React.FC = () => {
                   key={event.id}
                   className={`text-xs truncate px-1 py-0.5 rounded mb-1 ${
                     event.color || 'bg-blue-100 text-blue-800'
-                  }`}
+                  } border-2 border-red-500 bg-yellow-200`}
                 >
                   {event.time && `${event.time} · `}
                   {event.title || event.summary}
