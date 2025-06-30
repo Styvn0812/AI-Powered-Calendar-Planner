@@ -27,6 +27,8 @@ export interface CalendarEvent {
 export const calendarService = {
   // Get all events for a user
   async getEvents(userId: string): Promise<CalendarEvent[]> {
+    console.log('Fetching events for user:', userId);
+    
     const { data, error } = await supabase
       .from('calendar_events')
       .select('*')
@@ -35,14 +37,23 @@ export const calendarService = {
 
     if (error) {
       console.error('Error fetching events:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       throw error;
     }
 
+    console.log('Fetched events:', data);
     return data || [];
   },
 
   // Create a new event
   async createEvent(event: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'>): Promise<CalendarEvent> {
+    console.log('Creating event:', event);
+    
     const { data, error } = await supabase
       .from('calendar_events')
       .insert([event])
@@ -51,14 +62,23 @@ export const calendarService = {
 
     if (error) {
       console.error('Error creating event:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       throw error;
     }
 
+    console.log('Created event:', data);
     return data;
   },
 
   // Update an event
   async updateEvent(id: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent> {
+    console.log('Updating event:', id, updates);
+    
     const { data, error } = await supabase
       .from('calendar_events')
       .update(updates)
@@ -68,14 +88,23 @@ export const calendarService = {
 
     if (error) {
       console.error('Error updating event:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       throw error;
     }
 
+    console.log('Updated event:', data);
     return data;
   },
 
   // Delete an event
   async deleteEvent(id: string): Promise<void> {
+    console.log('Deleting event:', id);
+    
     const { error } = await supabase
       .from('calendar_events')
       .delete()
@@ -83,7 +112,15 @@ export const calendarService = {
 
     if (error) {
       console.error('Error deleting event:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       throw error;
     }
+
+    console.log('Event deleted successfully');
   }
 }; 
