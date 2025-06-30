@@ -1,5 +1,6 @@
 import React, { useState, createContext, useContext, ReactNode } from 'react';
 import { askGemini } from '../services/gemini';
+import { useCalendar } from './CalendarContext';
 
 export interface ChatMessage {
   id: string;
@@ -25,9 +26,19 @@ export const ChatProvider: React.FC<{
     timestamp: new Date()
   }]);
   const [isLoading, setIsLoading] = useState(false);
+  const { events } = useCalendar();
+
+  const formatEventsForAI = () => {
+    if (!events || events.length === 0) return 'You have no events.';
+    return events.map(e => {
+      let line = `- ${e.title} on ${e.dateString}`;
+      if (e.time) line += ` at ${e.time}`;
+      if (e.description) line += ` (${e.description})`;
+      return line;
+    }).join('\n');
+  };
 
   const sendMessage = async (text: string) => {
-    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       text,
@@ -37,7 +48,9 @@ export const ChatProvider: React.FC<{
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     try {
-      const response = await askGemini(text);
+      const eventsSummary = formatEventsForAI();
+      const promptWithEvents = `Here are the user's calendar events:\n${eventsSummary}\n\nUser's question: ${text}`;
+      const response = await askGemini(promptWithEvents);
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: response,
