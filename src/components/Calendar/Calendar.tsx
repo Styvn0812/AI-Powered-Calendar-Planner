@@ -76,6 +76,7 @@ export const Calendar: React.FC = () => {
       const cloneDay = new Date(day);
       cloneDay.setHours(0, 0, 0, 0);
       const eventsForDay = getEventsForDate(cloneDay);
+      console.log('Tile', cloneDay.toISOString(), 'eventsForDay:', eventsForDay);
       const googleEventsForDay = googleEvents.filter(event => {
         const eventDate = new Date(event.start.dateTime || event.start.date || '');
         return isSameMonth(eventDate, day) && eventDate.getDate() === day.getDate();
