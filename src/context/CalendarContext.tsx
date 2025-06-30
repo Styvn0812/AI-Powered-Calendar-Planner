@@ -7,6 +7,7 @@ export interface Event {
   id: string;
   title: string;
   date: Date;
+  dateString: string;
   description?: string;
   time?: string;
   color?: string;
@@ -60,7 +61,7 @@ export const CalendarProvider: React.FC<{
     try {
       const supabaseEvents = await calendarService.getEvents(user.id);
       
-      // Convert Supabase events to our Event format, using local midnight
+      // Convert Supabase events to our Event format, using local midnight and dateString
       const convertedEvents: Event[] = supabaseEvents.map((supabaseEvent: CalendarEvent) => {
         // Parse as UTC, then convert to local midnight
         const utcDate = new Date(supabaseEvent.start_time);
@@ -70,10 +71,13 @@ export const CalendarProvider: React.FC<{
           utcDate.getDate(),
           0, 0, 0, 0
         );
+        // Get local date string in YYYY-MM-DD
+        const dateString = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
         return {
           id: supabaseEvent.id!,
           title: supabaseEvent.title,
           date: localDate,
+          dateString,
           description: supabaseEvent.description,
           time: utcDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           color: supabaseEvent.color || 'bg-blue-500',
@@ -93,7 +97,7 @@ export const CalendarProvider: React.FC<{
     }
   };
 
-  const addEvent = async (event: Omit<Event, 'id'>) => {
+  const addEvent = async (event: Omit<Event, 'id' | 'dateString'>) => {
     if (!user?.id) {
       setError('User not authenticated');
       return;
@@ -103,7 +107,8 @@ export const CalendarProvider: React.FC<{
       // Ensure the date is set to local midnight
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
-
+      // Get local date string in YYYY-MM-DD
+      const dateString = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
       const newSupabaseEvent: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'> = {
         user_id: user.id,
         title: event.title,
@@ -119,11 +124,12 @@ export const CalendarProvider: React.FC<{
       // Store event.date as a local Date object at midnight
       const localDate = new Date(createdEvent.start_time);
       localDate.setHours(0, 0, 0, 0);
-
+      const newDateString = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
       const newEvent: Event = {
         id: createdEvent.id!,
         title: createdEvent.title,
         date: localDate,
+        dateString: newDateString,
         description: createdEvent.description,
         time: new Date(createdEvent.start_time).toLocaleTimeString([], {
           hour: '2-digit',
@@ -190,18 +196,10 @@ export const CalendarProvider: React.FC<{
   };
 
   const getEventsForDate = (date: Date) => {
-    // Compare only the date part (ignoring time and timezone)
-    console.log('getEventsForDate called for:', date.toISOString());
-    console.log('Current events array:', events.map(e => ({ id: e.id, date: e.date, dateISO: e.date instanceof Date ? e.date.toISOString() : e.date })));
-    const result = events.filter(event => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      const compareDate = new Date(date);
-      compareDate.setHours(0, 0, 0, 0);
-      console.log('Comparing eventDate:', eventDate.toISOString(), 'with compareDate:', compareDate.toISOString());
-      return eventDate.getTime() === compareDate.getTime();
-    });
-    console.log('getEventsForDate result for', date.toISOString(), result);
+    // Use local date string for comparison
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const result = events.filter(event => event.dateString === dateString);
+    console.log('getEventsForDate for', dateString, result);
     return result;
   };
 
