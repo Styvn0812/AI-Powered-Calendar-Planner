@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSignUp } from '@clerk/clerk-react';
 
@@ -8,6 +8,18 @@ const SignUp: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+  // Listen for the CAPTCHA token from Clerk
+  useEffect(() => {
+    const handler = (event: any) => {
+      if (event.detail?.captchaToken) {
+        setCaptchaToken(event.detail.captchaToken);
+      }
+    };
+    window.addEventListener('clerk-captcha', handler);
+    return () => window.removeEventListener('clerk-captcha', handler);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,8 +29,16 @@ const SignUp: React.FC = () => {
       setError('Passwords do not match');
       return;
     }
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA');
+      return;
+    }
     try {
-      const result = await signUp.create({ identifier: email, password });
+      const result = await signUp.create({
+        emailAddress: email,
+        password,
+        captchaToken,
+      });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         window.location.href = '/app';
@@ -64,6 +84,8 @@ const SignUp: React.FC = () => {
               onChange={e => setConfirm(e.target.value)}
             />
           </div>
+          {/* Clerk CAPTCHA widget */}
+          <div id="clerk-captcha" className="my-4" />
           <button
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition-colors"
