@@ -4,16 +4,19 @@
 @import 'tailwindcss/utilities';
 /* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
 
-/* Center Clerk Authentication UI */
-.cl-userProfile-root,
-.cl-userProfile-page,
-.cl-userProfile-card,
+/* Center Clerk Authentication UI - Only on auth pages */
+body:has(.cl-signIn-root),
+body:has(.cl-signUp-root),
+body:has(.cl-userProfile-root) {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Center Clerk components only when they're the main content */
 .cl-signIn-root,
-.cl-signIn-page,
-.cl-signIn-card,
 .cl-signUp-root,
-.cl-signUp-page,
-.cl-signUp-card {
+.cl-userProfile-root {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -28,18 +31,13 @@
   width: 100% !important;
 }
 
-/* Ensure the page takes full height */
-body, html {
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Center any Clerk components that might not be caught by the above */
+/* Remove the problematic styles that were affecting the main app */
+.cl-userProfile-page,
+.cl-userProfile-card,
+.cl-signIn-page,
+.cl-signIn-card,
+.cl-signUp-page,
+.cl-signUp-card,
 [data-clerk-component] {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  min-height: 100vh !important;
-  width: 100% !important;
+  /* Remove the centering styles that were breaking the main app */
 }
