@@ -12,6 +12,11 @@ export async function askGemini(prompt: string, userId: string): Promise<string>
       throw new Error('Gemini API key is not configured. Please check your .env file.');
     }
 
+    // Get today's date in local time (YYYY-MM-DD)
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayLine = `Today is ${todayString}.`;
+
     // Fetch calendar events for the user
     let eventsSummary = '';
     try {
@@ -31,7 +36,7 @@ export async function askGemini(prompt: string, userId: string): Promise<string>
     const systemPrompt = `\nYou are an AI scheduling assistant. Only answer questions related to scheduling, calendar events, meetings, reminders, and time management. \nIf a user asks something unrelated, politely tell them you can only help with scheduling and calendar tasks.`;
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-    const result = await model.generateContent(eventsSummary + '\n' + systemPrompt + '\n' + prompt);
+    const result = await model.generateContent(todayLine + '\n' + eventsSummary + '\n' + systemPrompt + '\n' + prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
