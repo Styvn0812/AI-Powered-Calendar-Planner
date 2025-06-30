@@ -16,7 +16,9 @@ export const EventForm = ({
     addEvent,
     updateEvent,
     events,
-    selectedDate
+    selectedDate,
+    loading,
+    error
   } = useCalendar();
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -24,6 +26,7 @@ export const EventForm = ({
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('bg-blue-500');
   const [dateError, setDateError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -66,7 +69,7 @@ export const EventForm = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Final validation before submission
@@ -78,20 +81,30 @@ export const EventForm = ({
       return;
     }
 
-    const eventData = {
-      title,
-      date: new Date(date),
-      time,
-      description,
-      color
-    };
-    
-    if (eventId) {
-      updateEvent(eventId, eventData);
-    } else {
-      addEvent(eventData);
+    setIsSubmitting(true);
+
+    try {
+      const eventData = {
+        title,
+        date: new Date(date),
+        time,
+        description,
+        color
+      };
+      
+      if (eventId) {
+        await updateEvent(eventId, eventData);
+      } else {
+        await addEvent(eventData);
+      }
+      
+      onClose();
+    } catch (err) {
+      console.error('Error saving event:', err);
+      // Error is already handled in the context
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   const colorOptions = [{
@@ -122,10 +135,21 @@ export const EventForm = ({
         <h3 className="text-lg font-semibold">
           {eventId ? 'Edit Event' : 'Add New Event'}
         </h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <button 
+          onClick={onClose} 
+          className="text-gray-400 hover:text-gray-600"
+          disabled={isSubmitting}
+        >
           <XIcon className="w-5 h-5" />
         </button>
       </div>
+      
+      {error && (
+        <div className="p-4 bg-red-50 border-b border-red-200">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="p-4">
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -136,7 +160,8 @@ export const EventForm = ({
             value={title} 
             onChange={e => setTitle(e.target.value)} 
             required 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100" 
           />
         </div>
         <div className="mb-4">
@@ -149,7 +174,8 @@ export const EventForm = ({
             onChange={handleDateChange}
             min={today}
             required 
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+            disabled={isSubmitting}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100 ${
               dateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
             }`} 
           />
@@ -166,7 +192,8 @@ export const EventForm = ({
             value={time} 
             onChange={e => setTime(e.target.value)} 
             placeholder="e.g. 3:30 PM" 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100" 
           />
         </div>
         <div className="mb-4">
@@ -177,7 +204,8 @@ export const EventForm = ({
             value={description} 
             onChange={e => setDescription(e.target.value)} 
             rows={3} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100" 
           />
         </div>
         <div className="mb-5">
@@ -190,9 +218,10 @@ export const EventForm = ({
                 key={option.value} 
                 type="button" 
                 onClick={() => setColor(option.value)} 
+                disabled={isSubmitting}
                 className={`w-8 h-8 rounded-full border-2 ${
                   color === option.value ? 'border-gray-900' : 'border-transparent'
-                }`}
+                } disabled:opacity-50`}
               >
                 <div className={`w-full h-full rounded-full ${option.value}`} />
               </button>
@@ -203,15 +232,17 @@ export const EventForm = ({
           <button 
             type="button" 
             onClick={onClose} 
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            disabled={isSubmitting}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             Cancel
           </button>
           <button 
             type="submit" 
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            disabled={isSubmitting}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {eventId ? 'Update' : 'Create'}
+            {isSubmitting ? 'Saving...' : (eventId ? 'Update' : 'Create')}
           </button>
         </div>
       </form>
