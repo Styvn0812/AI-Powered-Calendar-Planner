@@ -92,26 +92,34 @@ export const CalendarProvider: React.FC<{
     }
 
     try {
+      // Ensure the date is set to local midnight
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+
       const newSupabaseEvent: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'> = {
         user_id: user.id,
         title: event.title,
         description: event.description,
-        start_time: event.start_time || event.date.toISOString(),
-        end_time: event.end_time || addDays(event.date, 1).toISOString(),
+        start_time: event.start_time || eventDate.toISOString(),
+        end_time: event.end_time || addDays(eventDate, 1).toISOString(),
         location: event.location,
         color: event.color
       };
 
       const createdEvent = await calendarService.createEvent(newSupabaseEvent);
-      
+
+      // Store event.date as a local Date object at midnight
+      const localDate = new Date(createdEvent.start_time);
+      localDate.setHours(0, 0, 0, 0);
+
       const newEvent: Event = {
         id: createdEvent.id!,
         title: createdEvent.title,
-        date: parseISO(createdEvent.start_time),
+        date: localDate,
         description: createdEvent.description,
-        time: new Date(createdEvent.start_time).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        time: new Date(createdEvent.start_time).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
         }),
         color: createdEvent.color || 'bg-blue-500',
         location: createdEvent.location,
@@ -170,7 +178,14 @@ export const CalendarProvider: React.FC<{
   };
 
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => isSameDay(new Date(event.date), date));
+    // Compare only the date part (ignoring time and timezone)
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      const compareDate = new Date(date);
+      compareDate.setHours(0, 0, 0, 0);
+      return eventDate.getTime() === compareDate.getTime();
+    });
   };
 
   return (
