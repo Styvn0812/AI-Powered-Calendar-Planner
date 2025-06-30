@@ -60,21 +60,28 @@ export const CalendarProvider: React.FC<{
     try {
       const supabaseEvents = await calendarService.getEvents(user.id);
       
-      // Convert Supabase events to our Event format
-      const convertedEvents: Event[] = supabaseEvents.map((supabaseEvent: CalendarEvent) => ({
-        id: supabaseEvent.id!,
-        title: supabaseEvent.title,
-        date: parseISO(supabaseEvent.start_time),
-        description: supabaseEvent.description,
-        time: new Date(supabaseEvent.start_time).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        color: supabaseEvent.color || 'bg-blue-500',
-        location: supabaseEvent.location,
-        start_time: supabaseEvent.start_time,
-        end_time: supabaseEvent.end_time
-      }));
+      // Convert Supabase events to our Event format, using local midnight
+      const convertedEvents: Event[] = supabaseEvents.map((supabaseEvent: CalendarEvent) => {
+        // Parse as UTC, then convert to local midnight
+        const utcDate = new Date(supabaseEvent.start_time);
+        const localDate = new Date(
+          utcDate.getFullYear(),
+          utcDate.getMonth(),
+          utcDate.getDate(),
+          0, 0, 0, 0
+        );
+        return {
+          id: supabaseEvent.id!,
+          title: supabaseEvent.title,
+          date: localDate,
+          description: supabaseEvent.description,
+          time: utcDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          color: supabaseEvent.color || 'bg-blue-500',
+          location: supabaseEvent.location,
+          start_time: supabaseEvent.start_time,
+          end_time: supabaseEvent.end_time
+        };
+      });
       
       setEvents(convertedEvents);
     } catch (err) {
