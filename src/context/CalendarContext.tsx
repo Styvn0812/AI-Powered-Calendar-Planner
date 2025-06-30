@@ -136,6 +136,8 @@ export const CalendarProvider: React.FC<{
 
       setEvents([...events, newEvent]);
       setError(null);
+      // Force reload events from Supabase to ensure calendar and sidebar are in sync
+      await loadEvents();
     } catch (err) {
       console.error('Error adding event:', err);
       setError('Failed to add event');
