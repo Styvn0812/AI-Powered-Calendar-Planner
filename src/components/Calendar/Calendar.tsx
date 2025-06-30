@@ -111,7 +111,7 @@ export const Calendar: React.FC = () => {
               </div>
             )}
           </div>
-          {hasEvents && isSameMonth(day, currentMonth) && (
+          {hasEvents && (
             <div className="mt-1">
               {[...eventsForDay, ...googleEventsForDay].slice(0, 2).map((event: any) => (
                 <div
