@@ -42,13 +42,50 @@ export const ChatProvider: React.FC<{
     try {
       // Check if user wants to add an event
       if (text.toLowerCase().includes('add') && text.toLowerCase().includes('event')) {
-        // Simple event parsing - look for date and title
+        // Enhanced event parsing - look for date and title
         const dateMatch = text.match(/(\w+ \d{1,2},? \d{4})/i);
-        const timeMatch = text.match(/(\d{1,2}:\d{2}|\d{1,2}\s*(am|pm))/i);
+        const timeMatch = text.match(/(\d{1,2}:\d{2}\s*(am|pm)|\d{1,2}\s*(am|pm))/i);
         
         if (dateMatch) {
-          const eventDate = new Date(dateMatch[1]);
+          let eventDate = new Date(dateMatch[1]);
           const eventTitle = text.replace(/add\s+event\s+/i, '').replace(/\s+on\s+.*$/i, '').trim();
+          
+          // Parse and set the time if provided
+          if (timeMatch) {
+            const timeStr = timeMatch[0].trim();
+            let hours = 0;
+            let minutes = 0;
+            
+            console.log('Time string found:', timeStr);
+            
+            if (timeStr.includes(':')) {
+              // Format: "2:30pm" or "14:30"
+              const [h, m] = timeStr.split(':');
+              hours = parseInt(h);
+              minutes = parseInt(m.replace(/\D/g, ''));
+              
+              // Handle AM/PM
+              if (timeStr.toLowerCase().includes('pm') && hours !== 12) {
+                hours += 12;
+              } else if (timeStr.toLowerCase().includes('am') && hours === 12) {
+                hours = 0;
+              }
+            } else {
+              // Format: "2pm" or "14"
+              hours = parseInt(timeStr.replace(/\D/g, ''));
+              if (timeStr.toLowerCase().includes('pm') && hours !== 12) {
+                hours += 12;
+              } else if (timeStr.toLowerCase().includes('am') && hours === 12) {
+                hours = 0;
+              }
+            }
+            
+            console.log('Parsed time:', { timeStr, hours, minutes, isPM: timeStr.toLowerCase().includes('pm') });
+            
+            // Set the time on the date
+            eventDate.setHours(hours, minutes, 0, 0);
+            console.log('Final event date:', eventDate);
+          }
           
           if (!isNaN(eventDate.getTime())) {
             await addEvent({

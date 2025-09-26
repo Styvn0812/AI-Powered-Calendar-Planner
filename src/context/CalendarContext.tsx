@@ -104,26 +104,34 @@ export const CalendarProvider: React.FC<{
     }
 
     try {
-      // Ensure the date is set to local midnight
+      // Use the event date as-is (preserving time if set)
       const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
+      
+      // If no specific time was set, default to midnight
+      if (!event.time) {
+        eventDate.setHours(0, 0, 0, 0);
+      }
+      
       // Get local date string in YYYY-MM-DD
       const dateString = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+      
+      // Create end time (1 hour after start time if no end time specified)
+      const endTime = event.end_time || addDays(eventDate, 1).toISOString();
+      
       const newSupabaseEvent: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'> = {
         user_id: user.id,
         title: event.title,
         description: event.description,
-        start_time: event.start_time || eventDate.toISOString(),
-        end_time: event.end_time || addDays(eventDate, 1).toISOString(),
+        start_time: eventDate.toISOString(),
+        end_time: endTime,
         location: event.location,
         color: event.color
       };
 
       const createdEvent = await calendarService.createEvent(newSupabaseEvent);
 
-      // Store event.date as a local Date object at midnight
+      // Store event.date preserving the time
       const localDate = new Date(createdEvent.start_time);
-      localDate.setHours(0, 0, 0, 0);
       const newDateString = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
       const newEvent: Event = {
         id: createdEvent.id!,
