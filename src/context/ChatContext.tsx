@@ -108,8 +108,8 @@ export const ChatProvider: React.FC<{
         }
       }
       
-      // For other messages, use Gemini
-      const response = await askGemini(text);
+      // For other messages, use Gemini with calendar context
+      const response = await askGemini(text, events);
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: response,
