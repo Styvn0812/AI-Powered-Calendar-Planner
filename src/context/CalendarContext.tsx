@@ -61,16 +61,12 @@ export const CalendarProvider: React.FC<{
     try {
       const supabaseEvents = await calendarService.getEvents(user.id);
       
-      // Convert Supabase events to our Event format, using local midnight and dateString
+      // Convert Supabase events to our Event format, preserving the time
       const convertedEvents: Event[] = supabaseEvents.map((supabaseEvent: CalendarEvent) => {
-        // Parse as UTC, then convert to local midnight
+        // Parse as UTC and preserve the time
         const utcDate = new Date(supabaseEvent.start_time);
-        const localDate = new Date(
-          utcDate.getFullYear(),
-          utcDate.getMonth(),
-          utcDate.getDate(),
-          0, 0, 0, 0
-        );
+        const localDate = new Date(utcDate);
+        
         // Get local date string in YYYY-MM-DD
         const dateString = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
         return {
