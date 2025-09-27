@@ -5,7 +5,7 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-export async function askGemini(prompt: string): Promise<string> {
+export async function askGemini(prompt: string, events?: any[]): Promise<string> {
   try {
     if (!API_KEY) {
       throw new Error('Gemini API key is not configured. Please check your .env file.');
@@ -15,14 +15,40 @@ export async function askGemini(prompt: string): Promise<string> {
     console.log('API Key length:', API_KEY?.length);
     console.log('Using model: gemini-2.5-flash');
     
-    const systemPrompt = `You are an AI scheduling assistant. Only answer questions related to scheduling, calendar events, meetings, reminders, and time management. 
-If a user asks something unrelated, politely tell them you can only help with scheduling and calendar tasks.`;
+    const systemPrompt = `You are an AI scheduling assistant with access to the user's calendar events. You can help with:
+    - Viewing and describing events
+    - Answering questions about schedules
+    - Providing event details and times
+    - Helping with calendar management
+    
+    Current date: ${new Date().toDateString()}
+    
+    User's Calendar Events:`;
+    
+        // Format events for AI context
+        let eventsContext = '';
+        if (events && events.length > 0) {
+          eventsContext = events.map(event => {
+            const eventDate = new Date(event.start_time || event.date);
+            return `- ${event.title} on ${eventDate.toDateString()}${event.time ? ` at ${event.time}` : ''}${event.description ? ` (${event.description})` : ''}`;
+          }).join('\n');
+        } else {
+          eventsContext = 'No events found in calendar.';
+        }
+
 
     // Try the newer gemini-2.5-flash model
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
-    // Simple approach without chat history
-    const fullPrompt = `${systemPrompt}\n\nUser: ${prompt}`;
+    // Create full prompt with calendar context
+    const fullPrompt = `${systemPrompt}
+
+${eventsContext}
+
+User Question: ${prompt}
+
+Please provide a helpful response about their calendar or scheduling needs.`;
+
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     return response.text();
